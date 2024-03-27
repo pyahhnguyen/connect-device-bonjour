@@ -3,6 +3,7 @@
  */
 const net = require('net');
 const mdns = require('mdns');
+const io = require('socket.io-client');
 const config = require('./config');
 
 const DEVICE_INIT = 0;
@@ -13,6 +14,7 @@ class Device {
         this.name = name;
         this.type = type || 'http';
         this.state = DEVICE_INIT;
+        this.client = null;
         this.panel = {};
     }
 
@@ -25,6 +27,7 @@ class Device {
             const port = service.port;
             this.panel = { name: service.name, host, port };
             console.log('Found a panel up', { name: service.name, host, port });
+            this.initConnection();
         });
         browser.on('serviceDown', service => {
             console.log('Found panel down', {
@@ -38,7 +41,25 @@ class Device {
         browser.start();
     }
 
-    initConnection() { }
+    initConnection() {
+        console.log(`Device ${this.name} start to connect panel ...`, {
+            host: this.panel.host,
+            port: this.panel.port
+        });
+        const ioStr = `http://${this.panel.host}:${this.panel.port}`;
+        this.client = io(ioStr);
+        // this.client = io();
+        this.client.on('connect', () => {
+            console.log('Connected panel OK ...');
+            this.client.emit('message', { name: this.name });
+        });
+        this.client.on('event', data => {
+            console.log('receive data', data);
+        });
+        this.client.on('disconnect', () => {
+            console.log('reconnecting ...');
+        });
+    }
 
     init() {
         // init socket io connection
