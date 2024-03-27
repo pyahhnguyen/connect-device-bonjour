@@ -1,14 +1,9 @@
 /**
  * This is misc device like a phone or a fridge.
  */
-
-const Bonjour = require('bonjour');
-
+const net = require('net');
+const mdns = require('mdns');
 const config = require('./config');
-
-// set up bonjour instance
-const opts = config.bonjour || {};
-const bonjour = Bonjour(opts);
 
 const DEVICE_INIT = 0;
 const DEVICE_ON = 1;
@@ -18,24 +13,39 @@ class Device {
         this.name = name;
         this.type = type || 'http';
         this.state = DEVICE_INIT;
-        this.client = null;
+        this.panel = {};
     }
 
-    init() {
+    initClient() {
         // init a bonjour client to search devices up/down
-        console.log(`Device ${this.name} is on, finding near panel ...`);
-        this.client = bonjour.find({ type: this.type });
-        this.client.on('up', payload => {
-            console.log('up payload>>', payload);
-            console.log('Found panel up', { name: payload.name, type: payload.type });
+        const browser = mdns.createBrowser(mdns.tcp(this.type));
+
+        browser.on('serviceUp', service => {
+            const host = service.addresses.find(ip => net.isIPv4(ip));
+            const port = service.port;
+            this.panel = { name: service.name, host, port };
+            console.log('Found a panel up', { name: service.name, host, port });
         });
-        this.client.on('down', payload => {
-            console.log('down payload>>', payload);
+        browser.on('serviceDown', service => {
             console.log('Found panel down', {
-                name: payload.name,
-                type: payload.type
+                name: service.name
             });
+            if (this.panel.name && this.panel.name === service.name) {
+                this.panel = {};
+            }
         });
+
+        browser.start();
+    }
+
+    initConnection() { }
+
+    init() {
+        // init socket io connection
+        console.log(`Device ${this.name} is on, finding near panel ...`);
+        this.initConnection();
+        // init mdns browser
+        this.initClient();
     }
 }
 

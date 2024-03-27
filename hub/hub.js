@@ -1,4 +1,5 @@
 /**
+ * for Deprecated now!!! use mdns instead of bonjour
  * This is hub device like panel.
  */
 

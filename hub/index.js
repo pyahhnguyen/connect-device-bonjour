@@ -1,9 +1,9 @@
 const Koa = require('koa');
 const http = require('http');
 const IO = require('koa-socket-2');
+const mdns = require('mdns');
 
 const config = require('./config');
-const Hub = require('./hub');
 
 const app = new Koa();
 const io = new IO();
@@ -25,8 +25,15 @@ const server = http.createServer(app.callback());
 server.listen(PORT);
 server.on('listening', () => {
     const type = 'http';
-    const hub = new Hub(NAME, type, PORT);
-    hub.init();
+
+    // publish an advertisement
+    const opt = { name: NAME };
+    const ad = mdns.createAdvertisement(
+        mdns.tcp('http'),
+        server.address().port,
+        opt
+    );
+    ad.start();
 
     console.info('Server is listening on port:%d', server.address().port);
 });
