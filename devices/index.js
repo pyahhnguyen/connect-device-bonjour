@@ -1,31 +1,43 @@
-const Koa = require('koa');
-const http = require('http');
-const IO = require('koa-socket-2');
+/**
+ * This is misc device like a phone or a fridge.
+ */
+
+const Bonjour = require('bonjour');
 
 const config = require('./config');
-const Device = require('./components/device');
 
-const app = new Koa();
-const io = new IO();
+// set up bonjour instance
+const opts = config.bonjour || {};
+const bonjour = Bonjour(opts);
 
-const NAME = process.env.DEVNAME || config.name;
-const PORT = process.env.PORT || config.port;
-app.use(ctx => {
-    ctx.body = `Hello, this is device ${NAME}`;
-});
+const DEVICE_INIT = 0;
+const DEVICE_ON = 1;
+const DEVICE_OFF = 2;
+class Device {
+    constructor(name, type) {
+        this.name = name;
+        this.type = type || 'http';
+        this.state = DEVICE_INIT;
+        this.client = null;
+    }
 
-io.attach(app);
+    init() {
+        // init a bonjour client to search devices up/down
+        console.log(`Device ${this.name} is on, finding near panel ...`);
+        this.client = bonjour.find({ type: this.type });
+        this.client.on('up', payload => {
+            console.log('up payload>>', payload);
+            console.log('Found panel up', { name: payload.name, type: payload.type });
+        });
+        this.client.on('down', payload => {
+            console.log('down payload>>', payload);
+            console.log('Found panel down', {
+                name: payload.name,
+                type: payload.type
+            });
+        });
+    }
+}
 
-io.on('message', (ctx, data) => {
-    console.log('client sent data to message endpoint', data);
-});
-
-const server = http.createServer(app.callback());
-server.listen(PORT);
-server.on('listening', () => {
-    const type = 'http';
-    const device = new Device(NAME, type, PORT);
-    device.init();
-
-    console.info('Server is listening on port:%d', server.address().port);
-});
+const device = new Device(process.env.DEVNAME || config.name);
+device.init();
