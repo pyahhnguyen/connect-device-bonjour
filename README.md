@@ -5,8 +5,6 @@ Main goals:
 - Devices can connect to the hub device via websocket.
 - Hub device can hold presence of device with Redis.
 - Dockerization: build the service into docker image.
-- Test: enough unit tests and some integration tests.
-- Chaos Monkey tests.
 
 ## Prerequisites
 
