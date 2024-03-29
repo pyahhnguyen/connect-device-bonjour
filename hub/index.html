@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -53,7 +53,7 @@
         console.log('connect to server ok ...', socket.id);
       });
 
-      const Device = (props) => (
+      const Device = props => (
         <div className={`${props.state} device`}>
           <h3>{props.state}</h3>
           <h5>{props.name}</h5>
@@ -64,13 +64,13 @@
         constructor(props) {
           super(props);
           this.state = {
-            devices: [],
+            devices: []
           };
         }
         componentDidMount() {
-          socket.on('presence', (msg) => {
+          socket.on('presence', msg => {
             console.log('presence:', msg);
-            const devices = Object.keys(msg).map((item) => {
+            const devices = Object.keys(msg).map(item => {
               const device = { name: item, state: msg[item] };
               return device;
             });
@@ -79,7 +79,7 @@
           });
         }
         render() {
-          const items = this.state.devices.map((item) => (
+          const items = this.state.devices.map(item => (
             <Device key={item.name} name={item.name} state={item.state} />
           ));
           return <div className="container"> {items} </div>;
@@ -91,7 +91,7 @@
           <h1>Device Monitor</h1>
           <DeviceList />
         </div>,
-        document.getElementById('root'),
+        document.getElementById('root')
       );
     </script>
   </body>

@@ -1,3 +1,13 @@
+/*
+ * @Description: hub daemon
+ * 1. A http server with websocket
+ * 2. mdns client to find services in the network
+ * 3. serve device monitor page
+ * @Author: Dennis
+ * @LastEditTime: 2019-03-18 12:56:17
+ * @LastEditTime: 2019-03-19 20:44:22
+ */
+
 const fs = require('fs');
 const Koa = require('koa');
 const http = require('http');
@@ -17,14 +27,14 @@ const port = process.env.PORT || config.port;
 
 // valid hubName and port
 if (!hubName.startsWith(config.namePrefix) || !port) {
-    logger.warn('invalid hub name or port');
-    process.exit(1);
+  logger.warn('invalid hub name or port');
+  process.exit(1);
 }
 
 // serve device monitor page
 app.use(ctx => {
-    ctx.type = 'text/html';
-    ctx.body = fs.createReadStream(path.join(__dirname, 'index.html'));
+  ctx.type = 'text/html';
+  ctx.body = fs.createReadStream(path.join(__dirname, 'index.html'));
 });
 
 const server = http.createServer(app.callback());
@@ -36,75 +46,75 @@ const device = io.of(config.namespace.device);
 const chat = io.of(config.namespace.chat);
 
 const reportPresence = async () => {
-    const presence = await cache.getPresence();
-    chat.emit('presence', presence);
+  const presence = await cache.getPresence();
+  chat.emit('presence', presence);
 };
 
 // device on/off handler
 device.on('connection', async socket => {
-    logger.info('A device connected');
-    socket.on('online', async message => {
-        logger.debug('Receive message from device', message);
+  logger.info('A device connected');
+  socket.on('online', async message => {
+    logger.debug('Receive message from device', message);
 
-        // valid name, save the presence to redis
-        message.name &&
-            (await cache.setPresence({
-                socketId: socket.id,
-                devName: message.name,
-                state: 'ON'
-            }));
+    // valid name, save the presence to redis
+    message.name &&
+      (await cache.setPresence({
+        socketId: socket.id,
+        devName: message.name,
+        state: 'ON'
+      }));
 
-        // once update, emit presence to devcie monitor
-        reportPresence();
-    });
-    socket.on('disconnect', async msg => {
-        logger.warn('device disconnected');
-        // delete connection session(socketId, devName)
-        await cache.clearConnection({ socketId: socket.id });
-        // once update, emit presence to devcie monitor
-        reportPresence();
-    });
+    // once update, emit presence to devcie monitor
+    reportPresence();
+  });
+  socket.on('disconnect', async msg => {
+    logger.warn('device disconnected');
+    // delete connection session(socketId, devName)
+    await cache.clearConnection({ socketId: socket.id });
+    // once update, emit presence to devcie monitor
+    reportPresence();
+  });
 });
 
 // device monitor connect, emit the presence
 chat.on('connection', async socket => {
-    logger.debug('A device monitor connected');
-    reportPresence();
+  logger.debug('A device monitor connected');
+  reportPresence();
 });
 
 server.listen(port);
 
 let service = null;
 const doExit = () => {
-    logger.warn('service stop ...');
-    service.stop(() => {
-        logger.warn('service stop done');
-        logger.warn('panel leave ...');
-        process.exit(1);
-    });
+  logger.warn('service stop ...');
+  service.stop(() => {
+    logger.warn('service stop done');
+    logger.warn('panel leave ...');
+    process.exit(1);
+  });
 };
 process.on('SIGINT', err => {
-    doExit();
+  doExit();
 });
 process.on('uncaughtException', err => {
-    doExit();
+  doExit();
 });
 
 server.on('listening', () => {
-    // mdns deprecated for now
-    // publish an advertisement
-    // const ad = mdns.createAdvertisement(mdns.tcp('http'), server.address().port, {
-    //   name: hubName
-    // });
-    // ad.start();
+  // mdns deprecated for now
+  // publish an advertisement
+  // const ad = mdns.createAdvertisement(mdns.tcp('http'), server.address().port, {
+  //   name: hubName
+  // });
+  // ad.start();
 
-    // bonjour
-    service = bonjour.publish({
-        name: hubName,
-        type: 'http',
-        port: server.address().port
-    });
-    service.start();
+  // bonjour
+  service = bonjour.publish({
+    name: hubName,
+    type: 'http',
+    port: server.address().port
+  });
+  service.start();
 
-    logger.info('Server is listening on port:%d', server.address().port);
+  logger.info('Server is listening on port:%d', server.address().port);
 });
