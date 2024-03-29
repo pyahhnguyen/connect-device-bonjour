@@ -8,7 +8,7 @@ module.exports = {
     chat: 'chat'
   },
   redis: {
-    host: '127.0.0.1',
+    host: process.env.REDIS_URL || '127.0.0.1',
     port: '6379',
     db: '12'
   }

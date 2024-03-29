@@ -5,8 +5,9 @@
  
  */
 const net = require('net');
-const mdns = require('mdns');
+// const mdns = require('mdns');
 const io = require('socket.io-client');
+const bonjour = require('bonjour')();
 
 const config = require('./config');
 const logger = require('../utils/logger')('DEVICE');
@@ -23,10 +24,10 @@ class Device {
      * @return:
      */
     createBrowser() {
-        // TODO: more detail type
-        const browser = mdns.createBrowser(mdns.tcp(this.type));
+        const browser = bonjour.find({ type: this.type });
+
         // service up event handler
-        browser.on('serviceUp', service => {
+        browser.on('up', service => {
             logger.debug('service up:', service);
             // filter specific services
             if (!service.name || !service.name.startsWith(config.servicePrefix))
@@ -40,7 +41,8 @@ class Device {
         });
 
         // service down event handler
-        browser.on('serviceDown', service => {
+        browser.on('down', service => {
+            logger.debug('service down:', service);
             if (!service.name || !service.name.startsWith(config.servicePrefix))
                 return false;
             logger.warn('Found a panel down', { name: service.name });

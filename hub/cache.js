@@ -2,7 +2,7 @@
  * @Description: cacher based on ioredis
  * 1. save connect session(socketId, devName)
  * 2. save presence
- 
+
  */
 const _ = require('lodash');
 const Redis = require('ioredis');
@@ -11,14 +11,11 @@ Redis.Promise = require('bluebird');
 const config = require('./config');
 const logger = require('../utils/logger')('CACHE');
 
-const opt = _.defaultsDeep(
-    {
-        host: '127.0.0.1',
-        port: '6379',
-        db: '12'
-    },
-    config.redis
-);
+const opt = _.defaultsDeep(config.redis, {
+    host: '127.0.0.1',
+    port: '6379',
+    db: '12'
+});
 
 const key = config.presenceKey;
 class Cacher {

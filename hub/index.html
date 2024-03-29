@@ -6,6 +6,7 @@
     <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
     <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
     <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
   </head>
   <style>
     body {
@@ -36,39 +37,59 @@
       height: 80px;
       margin-right: 20px;
     }
-    .on {
+    .ON {
       background-color: green;
     }
-    .off {
+    .OFF {
       background-color: gray;
     }
   </style>
   <body>
     <div id="root"></div>
     <script type="text/babel">
+      // connect with server via websocket
+      const socket = io('/chat');
+      socket.on('connect', () => {
+        console.log('connect to server ok ...', socket.id);
+      });
+
       const Device = (props) => (
         <div className={`${props.state} device`}>
-          <h4>{props.name}</h4>
-          <h5>{props.state}</h5>
+          <h3>{props.state}</h3>
+          <h5>{props.name}</h5>
         </div>
       );
-      const devices = [
-        { name: 'PHONE', state: 'on' },
-        { name: 'FRIDGE', state: 'off' },
-        { name: 'WATCH', state: 'off' },
-      ];
-      const DeviceList = (props) => {
-        const devices = props.devices;
-        console.log(devices);
-        const items = devices.map((item) => (
-          <Device key={item.name} name={item.name} state={item.state} />
-        ));
-        return <div className="container"> {items} </div>;
-      };
+
+      class DeviceList extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            devices: [],
+          };
+        }
+        componentDidMount() {
+          socket.on('presence', (msg) => {
+            console.log('presence:', msg);
+            const devices = Object.keys(msg).map((item) => {
+              const device = { name: item, state: msg[item] };
+              return device;
+            });
+            console.log(devices);
+            this.setState({ devices });
+          });
+        }
+        render() {
+          const items = this.state.devices.map((item) => (
+            <Device key={item.name} name={item.name} state={item.state} />
+          ));
+          return <div className="container"> {items} </div>;
+        }
+      }
+
       ReactDOM.render(
         <div>
           <h1>Device Monitor</h1>
-          <DeviceList devices={devices} />
+          <DeviceList />
         </div>,
         document.getElementById('root'),
       );
