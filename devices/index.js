@@ -6,14 +6,14 @@ const mdns = require('mdns');
 const io = require('socket.io-client');
 const config = require('./config');
 
-const DEVICE_INIT = 0;
-const DEVICE_ON = 1;
-const DEVICE_OFF = 2;
+// const DEVICE_INIT = 0;
+// const DEVICE_ON = 1;
+// const DEVICE_OFF = 2;
 class Device {
     constructor(name, type) {
         this.name = name;
         this.type = type || 'http';
-        this.state = DEVICE_INIT;
+        // this.state = DEVICE_INIT;
         this.client = null;
         this.panel = {};
     }
