@@ -5,6 +5,7 @@ const net = require('net');
 const mdns = require('mdns');
 const io = require('socket.io-client');
 const config = require('./config');
+const logger = require('../utils/logger')('DEVICE');
 
 // const DEVICE_INIT = 0;
 // const DEVICE_ON = 1;
@@ -64,6 +65,8 @@ class Device {
     init() {
         // init socket io connection
         console.log(`Device ${this.name} is on, finding near panel ...`);
+        logger.info(`Device ${this.name} is on, finding near panel ...`);
+
         this.initConnection();
         // init mdns browser
         this.initClient();
