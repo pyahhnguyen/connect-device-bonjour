@@ -50,12 +50,11 @@ TODO
 
 #### step 1: set up the  device
 
-A little restriction about deviceName, which should prefix with **PRM#**. In production, maybe some actual way.
-
-**DEVNAME**.
+A little restriction about deviceName, which should prefix with **PRM#**. 
 
 Here is my shell command device 
-<div align=center> <img width="500px" height="350px" src="./doc/log_phone.jpg"/> </div>
+<div align=left> <img width="800px" height="150px" src="./doc/log_phone.jpg"/> </div>
+
 
 * Note: setup env ( i use window)
 
@@ -63,3 +62,18 @@ Here is my shell command device
 set NODE_ENV=DEV
 set DEVNAME=PRM#PHONE
 ```
+
+#### step 2: set up hub
+First run Redis Server If you have not, you may get the following error, refer  [here](https://github.com/tlaverdure/laravel-echo-server/issues/369). Another way,  run redis server like docker container under Window ( i run redis server with WSL)
+
+The panel will set up and advertise in the network. Upon panel`s up and down, the phone and fridge will know it.
+
+<div align=left> <img width="800px" height="150px" src="./doc/log_hub.jpg"/> </div>
+
+#### step 3: device monitor
+
+While we setting up the hub, we also serve a simple page for view the device presence. Open ur browser and input the url. **http://[your hub host ip]:3000**. And you will see the presence in a real time. Green is online, gray is offline.And you can try to crash some device daemon. The device will be gray.
+
+<div align=center> <img width="400px" height="250px"src="./doc/monitor.png"/> </div>
+
+Here, phone is online, and fridge is offline.
