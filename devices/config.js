@@ -1,5 +1,6 @@
 module.exports = {
-    name: 'Device 1',
-    port: 3000
+    name: 'PRM#PHONE',
+    port: 3000,
+    servicePrefix: 'PRM#',
+    namespace: 'device'
 };
-  

@@ -1,5 +1,15 @@
 module.exports = {
-    name: 'Panel 1',
-    port: 3000
-  };
-  
+  name: 'PRM#Panel',
+  port: 3000,
+  presenceKey: 'presence',
+  namePrefix: 'PRM#',
+  namespace: {
+    device: 'device',
+    chat: 'chat'
+  },
+  redis: {
+    host: '127.0.0.1',
+    port: '6379',
+    db: '12'
+  }
+};

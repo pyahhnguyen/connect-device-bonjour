@@ -22,7 +22,10 @@ app.use(ctx => {
 
 const server = http.createServer(app.callback());
 const io = socket(server);
-io.on('connection', async socket => {
+// news for device on/off  chat for sending presence to frontend
+const device = io.of('device');
+const chat = io.of('chat');
+device.on('connection', async socket => {
     console.log('A device connected');
     socket.on('message', async message => {
         console.log('Receive message from device', message);
@@ -32,11 +35,21 @@ io.on('connection', async socket => {
                 devName: message.name,
                 state: 'ON'
             }));
+        const presence = await cache.getPresence();
+        chat.emit('presence', presence);
     });
     socket.on('disconnect', async msg => {
         console.log('device disconnected');
         await cache.clearConnection({ socketId: socket.id });
+        const presence = await cache.getPresence();
+        chat.emit('presence', presence);
     });
+});
+
+chat.on('connection', async socket => {
+    console.log('A device monitor connected');
+    const presence = await cache.getPresence();
+    chat.emit('presence', presence);
 });
 server.listen(PORT);
 server.on('listening', () => {
