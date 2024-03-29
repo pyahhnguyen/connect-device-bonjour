@@ -54,10 +54,6 @@ A little restriction about deviceName, which should prefix with **PRM#**.
 
 Here is my shell command device 
 <div align=left> <img width="800px" height="150px" src="./doc/log_phone.jpg"/> </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> a3e75483cfba781f0d4d33be4b9321ec329ac5bc
 
 * Note: setup env ( i use window)
 
@@ -71,7 +67,7 @@ First run Redis Server If you have not, you may get the following error, refer  
 
 The panel will set up and advertise in the network. Upon panel`s up and down, the phone and fridge will know it.
 
-<div align=left> <img width="800px" height="150px" src="./doc/log_hub.jpg"/> </div>
+<div align=left> <img width="800px" height="100px" src="./doc/log_hub.jpg"/> </div>
 
 #### step 3: device monitor
 
