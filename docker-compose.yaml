@@ -1,0 +1,50 @@
+services:
+  phone:
+    build:
+      context: .
+      dockerfile: ./devices/Dockerfile
+    container_name: prm-phone
+    environment:
+      - DEVNAME=PRM#phone
+    networks:
+      - prm
+  fridge:
+    build:
+      context: .
+      dockerfile: ./devices/Dockerfile
+    container_name: prm-fridge
+    environment:
+      - DEVNAME=PRM#fridge
+    networks:
+      - prm
+  panel:
+    build:
+      context: .
+      dockerfile: ./hub/Dockerfile
+    container_name: prm-panel
+    environment:
+      - DEVNAME=PRM#panel
+      - REDIS_URL=prm-redis
+    ports:
+      - "3000:3000"
+    links:
+      - prm-redis
+    networks:
+      - prm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 5s
+      timeout: 3s
+      retries: 2
+    depends_on:
+      - prm-redis
+  prm-redis:
+    restart: unless-stopped
+    image: redis:6.2-alpine
+    networks:
+      - prm
+
+networks:
+  prm:
+    
+
