@@ -55,7 +55,7 @@ A little restriction about deviceName, which should prefix with **PRM#**. In pro
 **DEVNAME**.
 
 Here is my shell command device 
-<div align=center> <img width="1000px" height="200px" src="./doc/log_phone.jpg"/> </div>
+<div align=center> <img width="500px" height="100px" src="./doc/log_phone.jpg"/> </div>
 
 * Note: setup env ( i use window)
 
